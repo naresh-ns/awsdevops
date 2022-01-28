@@ -1,0 +1,98 @@
+def customimage
+def TAG
+pipeline{
+    agent {
+	  label 'master'
+	}
+	environment {
+        AWS_PROFILE=<aws>
+        KUBECONFIG=<kubeconfig-path>
+    }
+    stages{
+        stage('Clone Stage') {
+         steps {
+            dir ('code dir') {
+              git branch: '$BRANCH_NAME',
+              url: 'repo'
+             }
+   }
+}
+		stage('docker image creation'){
+		  steps {
+		    script{  
+           echo 'Starting to build docker image'
+           dir("dir")
+           {
+           
+               try{
+			   TAG = "${BUILD_TIMESTAMP}-V${BUILD_NUMBER}"
+               customimage = docker.build("xxxxx.dkr.ecr.us-east-1.amazonaws.com/repo:${TAG}",  "--pull -f Dockerfile .")
+		}
+		catch (exc) {
+            echo 'docker create failed'
+            throw exc
+      
+       } 
+           }
+		  }
+		}
+		}	
+		
+		stage('docker login'){
+		  steps{
+		      script{
+		          try{
+		     
+		    echo "authentication with ECR"
+			sh '$(aws ecr get-login --no-include-email --region ap-south-1)'
+			//sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin xxxx.dkr.ecr.us-east-1.amazonaws.com/repo'
+		 }
+		 catch (exc) {
+            echo 'login failed'
+            throw exc
+      
+       } 
+		}
+		  }
+		}
+		
+		stage('docker push'){
+		steps{
+		 script{
+		     try{
+		  echo "Docker push to ECR Repo"
+			customimage.push()
+		 }
+		  catch (exc) {
+            echo 'docker push failed'
+            throw exc
+      
+       } 
+		 }
+     }
+  }
+       stage('Deployment') {
+            steps {
+                 script {
+                    try{
+                dir("dir") 
+                {
+		      sh "sed -i  's/TAG/${TAG}/g'  /values.yaml"
+                      sh '''sed  -i  "s/BUILD_NUMBER/\\"v${BUILD_NUMBER}\\"/g" /Chart.yaml '''
+                      sh "/usr/local/bin/helm3 install/upgrade app-name -n namespace /folder/"
+                  }
+                    }
+                    catch (exc) {
+                    echo 'deployment failed'
+                    throw exc
+                  }
+                 }
+            }
+}
+              stage('CleanWorkspace') {
+            steps {
+                cleanWs()
+                 }
+                }
+}
+}
