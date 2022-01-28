@@ -1,0 +1,6 @@
+apiVersion: v2
+name: nodejs
+description: A Helm chart for Kubernetes
+type: application
+version: BUILD_NUMBER
+appVersion: 1.15.0

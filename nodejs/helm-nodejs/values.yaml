@@ -1,0 +1,31 @@
+replicas: 1
+app: <app-name>
+namespace: <ns>
+environment: <env>
+image: 731xxxxx.dkr.ecr.ap-south-1.amazonaws.com/nst-xxxx
+imageTag: TAG
+imagePullPolicy: Always
+name: <name>
+resources:
+  limits:
+    cpu: 1500m
+    memory: 3Gi
+  requests:
+    cpu: 1500m
+    memory: 3Gi
+servicespec:
+  type: NodePort
+spec:
+  minReplicas: 1
+  maxReplicas: 1
+  metrics:
+    memoryresource:
+      memoryname: memory
+      memorytarget:
+        memoryaverageUtilization: 75
+    cpuresource:
+      cpuname: cpu
+      cputarget:
+        cpuaverageUtilization: 95
+ingress:
+  host: < URL >
