@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-kubernetes
+spec:
+  selector:
+    matchLabels:
+      name: hello-kubernetes
+  template:
+    metadata:
+      labels:
+        name: hello-kubernetes
+    spec:
+      containers:
+        - name: app
+          image: 7353xxxxx.dkr.ecr.us-east-1.amazonaws.com/nst-devops:latest
+          ports:
+            - containerPort: 8080
