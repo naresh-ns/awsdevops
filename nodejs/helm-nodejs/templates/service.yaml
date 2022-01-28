@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  type: {{ .Values.servicespec.type }}
+  ports:
+    - port: 80
+      targetPort: 8080
+      name: http
+    - name: "https"
+      port: 443
+      targetPort: 8080
+      protocol: "TCP"
+  selector:
+    app: {{ .Values.app }}
